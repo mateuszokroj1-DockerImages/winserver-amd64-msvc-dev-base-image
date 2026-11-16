@@ -1,0 +1,58 @@
+name: Windows Server image deployment
+
+env:
+  tag: mateuszokroj1/winserver-amd64-msvc-dev-base-image:latest
+
+on:
+  push:
+    branches: [main, releases/*]
+
+  workflow_dispatch: 
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-scan-publish:
+
+    runs-on: windows-2025
+    
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker Login
+        # You may pin to the exact commit or the version.
+        # uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550
+        uses: docker/login-action@v4.8.0
+        with:
+          # Username used to log against the Docker registry
+          username: ${{ secrets.DOCKER_LOGIN }}
+          # Password or personal access token used to log against the Docker registry
+          password: ${{ secrets.DOCKER_PASS }}
+
+      - name: Build image
+        run: docker build --pull --tag ${{ env.tag }} .
+        shell: powershell
+
+      - name: Verify installed toolchain and startup shell
+        run: |
+          docker run --rm --entrypoint powershell.exe ${{ env.tag }} -NoLogo -ExecutionPolicy Bypass -Command "& C:\Enter-VsDevShell.ps1; if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) { throw 'MSVC is unavailable' }; if ($env:VSCMD_ARG_TGT_ARCH -ne 'x64') { throw 'VS Dev Shell is not x64' }; if (-not (Get-Command git-lfs.exe -ErrorAction SilentlyContinue)) { throw 'Git LFS is unavailable' }; pwsh --version; python --version; node --version; java --version; cargo --version; docker --version; cmake --version; dotnet --list-sdks; nuget help; vcpkg version"
+        shell: powershell
+
+      - name: Publish scanned image
+        run: |
+          docker push ${{ env.tag }}
+          if ($LASTEXITCODE -ne 0) { throw 'Docker push failed' }
+        shell: powershell
+
+      - name: Docker logout
+        if: always()
+        run: docker logout
+        shell: powershell
