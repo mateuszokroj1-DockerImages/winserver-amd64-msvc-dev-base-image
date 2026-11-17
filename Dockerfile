@@ -13,10 +13,13 @@ ENV CARGO_HOME=C:\Cargo `
 WORKDIR C:\workspace
 
 COPY Install-Tools.ps1 C:\Install-Tools.ps1
+COPY Install-VsBuildTools.ps1 C:\Install-VsBuildTools.ps1
 COPY Enter-VsDevShell.ps1 C:\Enter-VsDevShell.ps1
 
 RUN C:\Install-Tools.ps1
 RUN Remove-Item C:\Install-Tools.ps1 -Force
+RUN C:\Install-VsBuildTools.ps1
+RUN Remove-Item C:\Install-VsBuildTools.ps1 -Force
 
 USER ContainerUser
 
