@@ -1,7 +1,7 @@
 # escape=`
 FROM mcr.microsoft.com/windows/server:ltsc2025@sha256:b0a62a6e3590a063f3211efbec59d25c248e44e0890196ef9b7b8c06d60c4785
 
-SHELL ["powershell", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+SHELL ["powershell", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$ErrorActionPreference = 'Stop';"]
 
 ENV CARGO_HOME=C:\Cargo `
     RUSTUP_HOME=C:\Rustup `
@@ -15,8 +15,8 @@ WORKDIR C:\workspace
 COPY Install-Tools.ps1 C:\Install-Tools.ps1
 COPY Enter-VsDevShell.ps1 C:\Enter-VsDevShell.ps1
 
-RUN C:\Install-Tools.ps1; `
-    Remove-Item C:\Install-Tools.ps1 -Force
+RUN C:\Install-Tools.ps1
+RUN Remove-Item C:\Install-Tools.ps1 -Force
 
 USER ContainerUser
 

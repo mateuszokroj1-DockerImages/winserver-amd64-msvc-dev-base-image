@@ -34,6 +34,7 @@ manifest and its security advisories.
 | Docker | Docker CLI 29.9.3, official archive verified with SHA-256; no Docker daemon |
 | CMake | 4.5.0, official MSI verified with SHA-256 |
 | MSVC | Visual Studio Build Tools 2022, x64 C++ tools |
+| MSVC | Latest x64/x86 MSVC tools and Windows 11 SDK 10.0.26100 for classic desktop applications |
 | .NET SDK | 10.0.404, installer verified with SHA-512 |
 | .NET Framework | 4.8 targeting pack; framework runtime is provided by Windows |
 | NuGet | Current official `nuget.exe` |
