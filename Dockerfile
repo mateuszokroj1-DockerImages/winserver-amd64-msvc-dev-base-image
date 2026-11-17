@@ -23,9 +23,11 @@ RUN Remove-Item C:\Install-VsBuildTools.ps1 -Force
 
 USER ContainerUser
 
-RUN git clone --quiet --depth 1 --branch 2026.10.16 https://github.com/microsoft/vcpkg.git $env:VCPKG_ROOT; `
+RUN git clone --progress --depth 1 --branch 2026.10.16 https://github.com/microsoft/vcpkg.git $env:VCPKG_ROOT; `
     $revision = (git -C $env:VCPKG_ROOT rev-parse HEAD).Trim(); `
-    if ($revision -ne '9eec002df1cd109f8f104cd966a763daf9751489') { throw "Unexpected vcpkg revision: $revision" }; `
+    if ($revision -ne '9eec002df1cd109f8f104cd966a763daf9751489') { throw "Unexpected vcpkg revision: $revision" }
+
+RUN Write-Host 'Bootstrapping vcpkg'; `
     & "$env:VCPKG_ROOT\bootstrap-vcpkg.bat" -disableMetrics; `
     if ($LASTEXITCODE -ne 0) { throw 'vcpkg bootstrap failed' }
 
