@@ -1,5 +1,5 @@
 # escape=`
-FROM mcr.microsoft.com/windows/server:ltsc2025@sha256:b0a62a6e3590a063f3211efbec59d25c248e44e0890196ef9b7b8c06d60c4785
+FROM mcr.microsoft.com/dotnet/framework/runtime:4.8.1-windowsservercore-ltsc2025
 
 SHELL ["powershell", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$ErrorActionPreference = 'Stop';"]
 
