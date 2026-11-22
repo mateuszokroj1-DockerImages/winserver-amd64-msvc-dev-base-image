@@ -59,9 +59,21 @@ jobs:
 
       - name: Verify installed toolchain and startup shell
         run: |
-          docker run --rm --entrypoint powershell.exe ${{ env.tag }} -NoLogo -ExecutionPolicy Bypass -Command "& C:\Enter-VsDevShell.ps1; if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) { throw 'MSVC is unavailable' }; if ($env:VSCMD_ARG_TGT_ARCH -ne 'x64') { throw 'VS Dev Shell is not x64' }; if (-not (Get-Command git-lfs.exe -ErrorAction SilentlyContinue)) { throw 'Git LFS is unavailable' }; pwsh --version; python --version; node --version; java --version; cargo --version; docker --version; cmake --version; dotnet --list-sdks; nuget help; vcpkg version"
           $containerCommand = @'
           & C:\Enter-VsDevShell.ps1
+          if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) { throw 'MSVC is unavailable' }
+          if ($env:VSCMD_ARG_TGT_ARCH -ne 'x64') { throw 'VS Dev Shell is not x64' }
+          if (-not (Get-Command git-lfs.exe -ErrorAction SilentlyContinue)) { throw 'Git LFS is unavailable' }
+          pwsh --version
+          python --version
+          node --version
+          java --version
+          cargo --version
+          docker --version
+          cmake --version
+          dotnet --list-sdks
+          nuget help
+          vcpkg version
           $source = Join-Path $env:TEMP 'msvc-smoke.cpp'
           $executable = Join-Path $env:TEMP 'msvc-smoke.exe'
           [System.IO.File]::WriteAllText($source, "#include <windows.h>`r`nint main() { return GetCurrentProcessId() == 0; }")
@@ -70,6 +82,7 @@ jobs:
           & $executable
           if ($LASTEXITCODE -ne 0) { throw 'MSVC C++ smoke test failed' }
           '@
-          $containerCommand = $containerCommand -replace '\r?\n', '; '
-          docker run --rm --entrypoint powershell.exe ${{ env.tag }} -NoLogo -ExecutionPolicy Bypass -Command $containerCommand
+          $encodedCommand = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($containerCommand))
+          docker run --rm --entrypoint powershell.exe ${{ env.tag }} -NoLogo -ExecutionPolicy Bypass -EncodedCommand $encodedCommand
+          if ($LASTEXITCODE -ne 0) { throw 'Container toolchain verification failed' }
         shell: powershell
