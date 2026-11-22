@@ -5,7 +5,6 @@ SHELL ["powershell", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Co
 
 ENV CARGO_HOME=C:\Cargo `
     RUSTUP_HOME=C:\Rustup `
-    VCPKG_ROOT=C:\Users\ContainerUser\vcpkg `
     DOTNET_ROOT="C:\Program Files\dotnet" `
     JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-25.0.5.8-hotspot" `
     PATH="C:\Program Files\PowerShell\7;C:\Program Files\Git\cmd;C:\Program Files\nodejs;C:\Python314;C:\Python314\Scripts;C:\Program Files\Eclipse Adoptium\jdk-25.0.5.8-hotspot\bin;C:\Program Files\CMake\bin;C:\Program Files\dotnet;C:\Cargo\bin;C:\ProgramData\Docker;C:\ProgramData\NuGet;C:\Users\ContainerUser\vcpkg;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH"
@@ -18,15 +17,11 @@ COPY Enter-VsDevShell.ps1 C:\Enter-VsDevShell.ps1
 
 RUN C:\Install-Tools.ps1
 RUN Remove-Item C:\Install-Tools.ps1 -Force
-RUN C:\Install-VsBuildTools.ps1
-RUN Remove-Item C:\Install-VsBuildTools.ps1 -Force
 
 USER ContainerUser
 
-RUN git clone --progress https://github.com/microsoft/vcpkg.git $env:VCPKG_ROOT
-
-RUN Write-Host 'Bootstrapping vcpkg'; `
-    & "$env:VCPKG_ROOT\bootstrap-vcpkg.bat" -disableMetrics; `
-    if ($LASTEXITCODE -ne 0) { throw 'vcpkg bootstrap failed' }
+USER ContainerAdministrator
+RUN C:\Install-VsBuildTools.ps1
+RUN Remove-Item C:\Install-VsBuildTools.ps1 -Force
 
 ENTRYPOINT ["powershell.exe", "-NoLogo", "-NoExit", "-ExecutionPolicy", "Bypass", "-File", "C:\\Enter-VsDevShell.ps1"]
